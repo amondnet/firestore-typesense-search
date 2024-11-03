@@ -1,4 +1,4 @@
-const functions = require("firebase-functions");
+const functions = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 const config = require("./config.js");
 const createTypesenseClient = require("./createTypesenseClient.js");
@@ -26,7 +26,9 @@ const validateBackfillRun = (snapshot) => {
   return true;
 };
 
-module.exports = functions.firestore.document(config.typesenseBackfillTriggerDocumentInFirestore).onWrite(async (snapshot, context) => {
+module.exports = functions.firestore.onDocumentWritten({
+  document: config.typesenseBackfillTriggerDocumentInFirestore}, async (change, context) => {
+  const snapshot = change.data;
   functions.logger.info(
       "Backfilling " +
       `${config.firestoreCollectionFields.join(",")} fields in Firestore documents ` +
